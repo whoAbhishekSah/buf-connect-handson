@@ -12,3 +12,8 @@ plugins:
   - remote: "buf.build/protocolbuffers/go:v1.30.0"
     out: "proto"
     opt: "paths=source_relative"
+  # Add Python gRPC plugins
+  - remote: buf.build/protocolbuffers/python
+    out: python_gen
+  - remote: buf.build/grpc/python
+    out: python_gen
