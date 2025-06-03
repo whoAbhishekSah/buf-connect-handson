@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
+	"github.com/rs/cors"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
@@ -30,9 +31,38 @@ func main() {
 	mux := http.NewServeMux()
 	path, handler := greetv1connect.NewGreetServiceHandler(greeter)
 	mux.Handle(path, handler)
-	http.ListenAndServe(
-		"localhost:8080",
-		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
+
+	// Create CORS middleware
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:8003"}, // Allow your HTML server origin
+		AllowedMethods: []string{
+			http.MethodPost,
+			http.MethodGet,
+			http.MethodOptions,
+		},
+		AllowedHeaders: []string{
+			"Accept",
+			"Content-Type",
+			"Connect-Protocol-Version",
+			"Connect-Timeout-Ms",
+			"Grpc-Timeout",
+			"X-Grpc-Web",
+			"X-User-Agent",
+		},
+		ExposedHeaders: []string{
+			"Grpc-Status",
+			"Grpc-Message",
+			"Grpc-Status-Details-Bin",
+			"Greet-Version", // Add your custom header
+		},
+	})
+
+	// Wrap the h2c handler with CORS middleware
+	h2cHandler := h2c.NewHandler(mux, &http2.Server{})
+	corsHandler := corsMiddleware.Handler(h2cHandler)
+
+	log.Println("Starting server on localhost:8080")
+	if err := http.ListenAndServe("localhost:8080", corsHandler); err != nil {
+		log.Fatal(err)
+	}
 }
