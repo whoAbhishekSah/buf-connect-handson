@@ -37,7 +37,7 @@ func main() {
 	}
 
 	// Make the gRPC call
-	response, err := client.Greet(ctx, request)
+	response, err := client.PYGreet(ctx, request)
 	if err != nil {
 		log.Fatalf("Failed to greet: %v", err)
 	}

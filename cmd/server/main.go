@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/rs/cors"
@@ -24,6 +25,54 @@ func (s *GreetServer) Greet(ctx context.Context, req *connect.Request[greetv1.Gr
 	})
 	res.Header().Set("Greet-Version", "v1")
 	return res, nil
+}
+
+// Add the streaming implementation
+func (s *GreetServer) GreetStream(ctx context.Context, req *connect.Request[greetv1.GreetRequest], stream *connect.ServerStream[greetv1.GreetResponse]) error {
+	log.Printf("Started streaming for client: %s\n", req.Msg.Name)
+	
+	// Example greetings with different formats
+	greetingFormats := []struct {
+		format string
+		number int32
+	}{
+		{"Hello %s! Welcome to the stream", 1},
+		{"How are you doing today, %s?", 2},
+		{"Greetings and salutations, %s!", 3},
+		{"Hope you're having a great day, %s", 4},
+		{"Thank you for joining us, %s", 5},
+	}
+
+	for _, g := range greetingFormats {
+		// Check if client has disconnected
+		if ctx.Err() != nil {
+			log.Printf("Client disconnected: %v\n", ctx.Err())
+			return ctx.Err()
+		}
+
+		// Create the greeting message
+		greeting := fmt.Sprintf(g.format, req.Msg.Name)
+		
+		// Send the response
+		err := stream.Send(&greetv1.GreetResponse{
+			Greeting:       greeting,
+			GreetingNumber: g.number,
+		})
+		
+		if err != nil {
+			log.Printf("Error sending message: %v\n", err)
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		// Log the sent message
+		log.Printf("Sent greeting %d: %s\n", g.number, greeting)
+
+		// Add a small delay between messages
+		time.Sleep(1 * time.Second)
+	}
+
+	log.Printf("Finished streaming for client: %s\n", req.Msg.Name)
+	return nil
 }
 
 func main() {

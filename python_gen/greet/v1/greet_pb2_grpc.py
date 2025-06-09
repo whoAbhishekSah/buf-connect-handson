@@ -19,6 +19,11 @@ class GreetServiceStub(object):
                 request_serializer=greet_dot_v1_dot_greet__pb2.GreetRequest.SerializeToString,
                 response_deserializer=greet_dot_v1_dot_greet__pb2.GreetResponse.FromString,
                 _registered_method=True)
+        self.GreetStream = channel.unary_stream(
+                '/greet.v1.GreetService/GreetStream',
+                request_serializer=greet_dot_v1_dot_greet__pb2.GreetRequest.SerializeToString,
+                response_deserializer=greet_dot_v1_dot_greet__pb2.GreetResponse.FromString,
+                _registered_method=True)
 
 
 class GreetServiceServicer(object):
@@ -30,11 +35,23 @@ class GreetServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GreetStream(self, request, context):
+        """New streaming RPC
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GreetServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Greet': grpc.unary_unary_rpc_method_handler(
                     servicer.Greet,
+                    request_deserializer=greet_dot_v1_dot_greet__pb2.GreetRequest.FromString,
+                    response_serializer=greet_dot_v1_dot_greet__pb2.GreetResponse.SerializeToString,
+            ),
+            'GreetStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.GreetStream,
                     request_deserializer=greet_dot_v1_dot_greet__pb2.GreetRequest.FromString,
                     response_serializer=greet_dot_v1_dot_greet__pb2.GreetResponse.SerializeToString,
             ),
@@ -64,6 +81,33 @@ class GreetService(object):
             request,
             target,
             '/greet.v1.GreetService/Greet',
+            greet_dot_v1_dot_greet__pb2.GreetRequest.SerializeToString,
+            greet_dot_v1_dot_greet__pb2.GreetResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GreetStream(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/greet.v1.GreetService/GreetStream',
             greet_dot_v1_dot_greet__pb2.GreetRequest.SerializeToString,
             greet_dot_v1_dot_greet__pb2.GreetResponse.FromString,
             options,

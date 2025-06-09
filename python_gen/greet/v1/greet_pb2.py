@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14greet/v1/greet.proto\x12\x08greet.v1\"\"\n\x0cGreetRequest\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\"+\n\rGreetResponse\x12\x1a\n\x08greeting\x18\x01 \x01(\tR\x08greeting2J\n\x0cGreetService\x12:\n\x05Greet\x12\x16.greet.v1.GreetRequest\x1a\x17.greet.v1.GreetResponse\"\x00\x42\x1eZ\x1c\x65xample/gen/greet/v1;greetv1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14greet/v1/greet.proto\x12\x08greet.v1\"\"\n\x0cGreetRequest\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\"T\n\rGreetResponse\x12\x1a\n\x08greeting\x18\x01 \x01(\tR\x08greeting\x12\'\n\x0fgreeting_number\x18\x02 \x01(\x05R\x0egreetingNumber2\x8e\x01\n\x0cGreetService\x12:\n\x05Greet\x12\x16.greet.v1.GreetRequest\x1a\x17.greet.v1.GreetResponse\"\x00\x12\x42\n\x0bGreetStream\x12\x16.greet.v1.GreetRequest\x1a\x17.greet.v1.GreetResponse\"\x00\x30\x01\x42\x1eZ\x1c\x65xample/gen/greet/v1;greetv1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,7 +35,7 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GREETREQUEST']._serialized_start=34
   _globals['_GREETREQUEST']._serialized_end=68
   _globals['_GREETRESPONSE']._serialized_start=70
-  _globals['_GREETRESPONSE']._serialized_end=113
-  _globals['_GREETSERVICE']._serialized_start=115
-  _globals['_GREETSERVICE']._serialized_end=189
+  _globals['_GREETRESPONSE']._serialized_end=154
+  _globals['_GREETSERVICE']._serialized_start=157
+  _globals['_GREETSERVICE']._serialized_end=299
 # @@protoc_insertion_point(module_scope)

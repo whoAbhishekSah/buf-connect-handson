@@ -10,8 +10,11 @@ message GreetRequest {
 
 message GreetResponse {
   string greeting = 1;
+  int32 greeting_number = 2;  // Added to track the greeting number in the stream
 }
 
 service GreetService {
   rpc Greet(GreetRequest) returns (GreetResponse) {}
+  // New streaming RPC
+  rpc GreetStream(GreetRequest) returns (stream GreetResponse) {}
 }
