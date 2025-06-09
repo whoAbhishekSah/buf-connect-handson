@@ -17,3 +17,8 @@ plugins:
     out: python_gen
   - remote: buf.build/grpc/python
     out: python_gen
+  # Add TypeScript/Connect-Web plugins
+  - remote: buf.build/bufbuild/es:v1.3.0
+    out: app/gen
+  - remote: buf.build/bufbuild/connect-web:v0.8.6
+    out: app/gen

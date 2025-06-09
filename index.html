@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gRPC Web Client</title>
+    <title>Connect-RPC Web Client</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,6 +16,8 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
         }
         button {
             padding: 10px 20px;
@@ -24,28 +26,55 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #45a049;
         }
+        button:disabled {
+            background-color: #cccccc;
+        }
+        .stream-message {
+            padding: 8px;
+            margin: 5px 0;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        input {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
-    <h1>gRPC Greeter Client</h1>
-    <button onclick="callGreetService()">Send Greet Request</button>
+    <h1>Connect-RPC Greeter Client</h1>
+    <div>
+        <input type="text" id="nameInput" value="Guest" placeholder="Enter name">
+        <button onclick="callGreet()">Send Greet</button>
+        <button onclick="startStreaming()">Start Streaming</button>
+    </div>
     <div id="result" class="result"></div>
 
     <script>
-        async function callGreetService() {
+        async function callGreet() {
             const resultDiv = document.getElementById('result');
+            const nameInput = document.getElementById('nameInput');
+            
             try {
                 const response = await fetch('http://localhost:8080/greet.v1.GreetService/Greet', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Connect-Protocol-Version': '1'
                     },
                     body: JSON.stringify({
-                        name: 'Jane'
+                        name: nameInput.value || 'Guest'
                     })
                 });
 
@@ -60,8 +89,68 @@
                 `;
             } catch (error) {
                 resultDiv.innerHTML = `
-                    <h3>Error:</h3>
-                    <pre style="color: red">${error.message}</pre>
+                    <div class="error-message">
+                        <strong>Error:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function startStreaming() {
+            const resultDiv = document.getElementById('result');
+            const nameInput = document.getElementById('nameInput');
+            
+            resultDiv.innerHTML = '<h3>Streaming Responses:</h3>';
+
+            try {
+                const response = await fetch('http://localhost:8080/greet.v1.GreetService/GreetStream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Connect-Protocol-Version': '1',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: nameInput.value || 'Guest'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Stream request failed: ${response.status} - ${errorText}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    console.log('Received chunk:', chunk);
+
+                    try {
+                        const data = JSON.parse(chunk);
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'stream-message';
+                        messageDiv.innerHTML = `
+                            <strong>Greeting ${data.greetingNumber}:</strong>
+                            <p>${data.greeting}</p>
+                        `;
+                        resultDiv.appendChild(messageDiv);
+                        resultDiv.scrollTop = resultDiv.scrollHeight;
+                    } catch (e) {
+                        console.error('Failed to parse chunk:', chunk, e);
+                    }
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `
+                    <div class="error-message">
+                        <strong>Stream Error:</strong><br>
+                        ${error.message}
+                    </div>
                 `;
             }
         }
